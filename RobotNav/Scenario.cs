@@ -55,6 +55,8 @@ namespace RobotNav
             txtbox.Text += "Solution Length: " + solution.Count + Environment.NewLine + Environment.NewLine +
                 "Solution: ";
 
+            if (solution.Count == 0) return;
+
             while (solution.Count > 1)
             {
                 txtbox.AppendText(solution.Pop() + ", ");

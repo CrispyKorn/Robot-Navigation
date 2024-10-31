@@ -100,7 +100,7 @@ namespace RobotNav
         }
 
         /// <summary>
-        /// Draws all necessary content to the screen, for updating the scene
+        /// Draws all necessary content to the screen for updating the scene
         /// </summary>
         private void DrawScene()
         {
@@ -146,7 +146,7 @@ namespace RobotNav
             SingleGoalScenario singleGoalScenario = new SingleGoalScenario(grid, goalPositions[0]);
 
             //Initialize the desired pathfinding algorithm
-            Pathfinder<Position> routeFinder = null;
+            Pathfinder<Position>? routeFinder = null;
             if (rad_BFS.Checked) routeFinder = new BFS<Position>();
             if (rad_AStar.Checked) routeFinder = new AStar<Position>();
             if (rad_DFS.Checked) routeFinder = new DFS<Position>();
