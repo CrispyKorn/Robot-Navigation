@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 
 namespace RobotNav
 {
@@ -22,50 +18,48 @@ namespace RobotNav
         /// <summary>
         /// Describes a grid cell
         /// </summary>
-        public struct Cell
+        public class Cell
         {
-            public bool hasRobot;
-            public bool hasWall;
-            public bool hasGoal;
+            public bool HasRobot { get; set; } = false;
+            public bool HasWall { get; set; } = false;
+            public bool HasGoal { get; set; } = false;
         }
 
-        Size gridSize;
-        int cellSize;
-        Cell[,] grid;
+        private Size _gridSize;
+        private int _cellSize;
+        private Cell[,] _grid;
 
         /// <summary>
         /// The size of the grid, in cells
         /// </summary>
-        public Size GridSize { get { return gridSize; } }
+        public Size GridSize { get { return _gridSize; } }
         /// <summary>
         /// The size of each grid cell, in pixels
         /// </summary>
-        public int CellSize { get { return cellSize; } }
+        public int CellSize { get { return _cellSize; } }
         /// <summary>
         /// Gets the entire grid
         /// </summary>
-        public Cell[,] GetGrid { get { return grid; } }
+        public Cell[,] GetGrid { get { return _grid; } }
 
         /// <summary>
         /// Manages a grid of the chosen size
         /// </summary>
-        /// <param name="_gridSize">The size of the grid in cells</param>
-        /// <param name="_cellSize">The size of each cell in pixels (for display)</param>
-        public Grid(Size _gridSize, int _cellSize)
+        /// <param name="gridSize">The size of the grid in cells</param>
+        /// <param name="cellSize">The size of each cell in pixels (for display)</param>
+        public Grid(Size gridSize, int cellSize)
         {
-            gridSize = _gridSize;
-            cellSize = _cellSize;
+            _gridSize = gridSize;
+            _cellSize = cellSize;
 
             //Initialize the grid
-            grid = new Cell[gridSize.Width, gridSize.Height];
+            _grid = new Cell[_gridSize.Width, _gridSize.Height];
 
-            for (int x = 0; x < grid.GetLength(0); x++)
+            for (var x = 0; x < _gridSize.Width; x++)
             {
-                for (int y = 0; y < grid.GetLength(1); y++)
+                for (var y = 0; y < _gridSize.Height; y++)
                 {
-                    grid[x, y].hasRobot = false;
-                    grid[x, y].hasWall = false;
-                    grid[x, y].hasGoal = false;
+                    _grid[x, y] = new Cell();
                 }
             }
         }
@@ -77,7 +71,7 @@ namespace RobotNav
         /// <returns>Whether the given position is moveable</returns>
         public bool MoveablePos(Point pos)
         {
-            return PosInsideGrid(pos) && !grid[pos.X, pos.Y].hasWall;
+            return PosInsideGrid(pos) && !_grid[pos.X, pos.Y].HasWall;
         }
 
         /// <summary>
@@ -87,17 +81,21 @@ namespace RobotNav
         /// <returns>Whether the given position is contained within the grid</returns>
         public bool PosInsideGrid(Point pos)
         {
-            return pos.X >= 0 && pos.X < gridSize.Width && pos.Y >= 0 && pos.Y < gridSize.Height;
+            var posInsideX = pos.X >= 0 && pos.X < _gridSize.Width;
+            var posInsideY = pos.Y >= 0 && pos.Y < _gridSize.Height;
+            return posInsideX && posInsideY;
         }
 
         /// <summary>
         /// Converts a given grid position to pixel coordinates
         /// </summary>
         /// <param name="pos">The grid position to convert</param>
-        /// <returns>The relative world positon of the given cell</returns>
+        /// <returns>The relative world positon of the centre of the given cell</returns>
         public Point CellToWorld(Point pos)
         {
-            return new Point(pos.X * cellSize + (cellSize / 2), pos.Y * cellSize + (cellSize / 2));
+            var cellPosX = pos.X * _cellSize + (_cellSize / 2);
+            var cellPosY = pos.Y * _cellSize + (_cellSize / 2);
+            return new Point(cellPosX, cellPosY);
         }
 
         /// <summary>
@@ -113,9 +111,9 @@ namespace RobotNav
             //Add the corresponding content
             switch (content)
             {
-                case Content.Robot: grid[pos.X, pos.Y].hasRobot = true; break;
-                case Content.Wall: grid[pos.X, pos.Y].hasWall = true; break;
-                case Content.Goal: grid[pos.X, pos.Y].hasGoal = true; break;
+                case Content.Robot: _grid[pos.X, pos.Y].HasRobot = true; break;
+                case Content.Wall: _grid[pos.X, pos.Y].HasWall = true; break;
+                case Content.Goal: _grid[pos.X, pos.Y].HasGoal = true; break;
             }
         }
 
@@ -132,9 +130,9 @@ namespace RobotNav
             //Remove the corresponding content
             switch (content)
             {
-                case Content.Robot: grid[pos.X, pos.Y].hasRobot = false; break;
-                case Content.Wall: grid[pos.X, pos.Y].hasWall = false; break;
-                case Content.Goal: grid[pos.X, pos.Y].hasGoal = false; break;
+                case Content.Robot: _grid[pos.X, pos.Y].HasRobot = false; break;
+                case Content.Wall: _grid[pos.X, pos.Y].HasWall = false; break;
+                case Content.Goal: _grid[pos.X, pos.Y].HasGoal = false; break;
             }
         }
 
@@ -146,9 +144,9 @@ namespace RobotNav
         {
             if (!PosInsideGrid(pos)) return;
 
-            grid[pos.X, pos.Y].hasRobot = false;
-            grid[pos.X, pos.Y].hasWall = false;
-            grid[pos.X, pos.Y].hasGoal = false;
+            _grid[pos.X, pos.Y].HasRobot = false;
+            _grid[pos.X, pos.Y].HasWall = false;
+            _grid[pos.X, pos.Y].HasGoal = false;
         }
 
         /// <summary>
@@ -158,9 +156,9 @@ namespace RobotNav
         {
             Point currentPoint = new Point();
 
-            for (currentPoint.X = 0; currentPoint.X < grid.GetLength(0); currentPoint.X++)
+            for (currentPoint.X = 0; currentPoint.X < _grid.GetLength(0); currentPoint.X++)
             {
-                for (currentPoint.Y = 0; currentPoint.Y < grid.GetLength(1); currentPoint.Y++)
+                for (currentPoint.Y = 0; currentPoint.Y < _grid.GetLength(1); currentPoint.Y++)
                 {
                     ClearCell(currentPoint);
                 }
@@ -177,12 +175,12 @@ namespace RobotNav
         public void DrawGrid(Graphics graphics, Pen gridPen, Brush wallBrush, Brush goalBrush)
         {
             //Draw Content
-            for (int x = 0; x < gridSize.Width; x++)
+            for (var x = 0; x < _gridSize.Width; x++)
             {
-                for (int y = 0; y < gridSize.Height; y++)
+                for (var y = 0; y < _gridSize.Height; y++)
                 {                
-                    if (grid[x, y].hasWall) DrawContent(new Point(x, y), graphics, wallBrush);
-                    if (grid[x, y].hasGoal) DrawContent(new Point(x, y), graphics, goalBrush);
+                    if (_grid[x, y].HasWall) DrawContent(new Point(x, y), graphics, wallBrush);
+                    if (_grid[x, y].HasGoal) DrawContent(new Point(x, y), graphics, goalBrush);
                 }
             }
 
@@ -191,10 +189,10 @@ namespace RobotNav
             Point horizontalStart, horizontalEnd, verticalStart, verticalEnd;
 
             //Vertical Lines
-            for (int x = 0; x <= gridSize.Width; x++)
+            for (var x = 0; x <= _gridSize.Width; x++)
             {
-                verticalStart = new Point(cellSize * x, 0);
-                verticalEnd = new Point(cellSize * x, cellSize * gridSize.Height);
+                verticalStart = new Point(_cellSize * x, 0);
+                verticalEnd = new Point(_cellSize * x, _cellSize * _gridSize.Height);
 
                 verticalStart.Offset(marginSize, marginSize);
                 verticalEnd.Offset(marginSize, marginSize);
@@ -203,10 +201,10 @@ namespace RobotNav
             }
 
             //Horizontal Lines
-            for (int y = 0; y <= gridSize.Height; y++)
+            for (var y = 0; y <= _gridSize.Height; y++)
             {
-                horizontalStart = new Point(0, cellSize * y);
-                horizontalEnd = new Point(cellSize * gridSize.Width, cellSize * y);
+                horizontalStart = new Point(0, _cellSize * y);
+                horizontalEnd = new Point(_cellSize * _gridSize.Width, _cellSize * y);
 
                 horizontalStart.Offset(marginSize, marginSize);
                 horizontalEnd.Offset(marginSize, marginSize);
@@ -224,7 +222,7 @@ namespace RobotNav
         private void DrawContent(Point pos, Graphics graphics, Brush brush)
         {
             //Initialize the required components
-            Size objSize = new Size(cellSize, cellSize);
+            var objSize = new Size(_cellSize, _cellSize);
             Point currentPos = CellToWorld(pos);
             int marginSize = Constants.MARGIN_SIZE;
 

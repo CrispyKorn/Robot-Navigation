@@ -1,22 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 
 namespace RobotNav
 {
     internal class DFS<T> : Pathfinder<T>
     {
-        LinkedList<State<T>> frontier;
+        LinkedList<State<T>> _frontier = new();
 
         /// <summary>
         /// A pathfinder that uses Depth-First Search
         /// </summary>
         public DFS()
         {
-            frontier = new LinkedList<State<T>>();
-            searchedNodes = new HashSet<T>();
+
         }
 
         /// <summary>
@@ -26,12 +21,12 @@ namespace RobotNav
         public override void AddArrayToFrontier(List<State<T>> nodes)
         {
             //Iterate through the nodes to add backwards so they stay in order (up -> left -> right -> down) when added to the frontier
-            for (int i = nodes.Count - 1; i >= 0; i--)
+            for (var i = nodes.Count - 1; i >= 0; i--)
             {
-                if (!searchedNodes.Contains(nodes[i].data))
+                if (!_searchedNodes.Contains(nodes[i].Data))
                 {
-                    frontier.AddFirst(nodes[i]);
-                    discovered++;
+                    _frontier.AddFirst(nodes[i]);
+                    _discovered++;
                 }
             }
         }
@@ -46,45 +41,46 @@ namespace RobotNav
         /// <returns></returns>
         public override LinkedList<State<T>> Search(State<T> initialState, State<T> goalState, Scenario<T> scenario, TextBox output)
         {
-            //For when we haven't already added a list of starting options
-            if (initialState != null) frontier.AddFirst(initialState);
+            // For when we haven't already added a list of starting options
+            if (initialState is not null) _frontier.AddFirst(initialState);
 
-            State<T> currentState = null;
-            bool foundGoal = false;
+            LinkedList<State<T>> solution = new();
 
-            //While there is still nodes to search
-            while (frontier.Count > 0)
+            if (_frontier.Count == 0 || _frontier.First is null) return solution;
+
+            State<T> currentState;
+            var foundGoal = false;
+
+            do
             {
-                //Set the current state to the first item of the frontier queue, adding it to the set of searched nodes
-                currentState = frontier.First.Value;
-                frontier.RemoveFirst();
-                searchedNodes.Add(currentState.data);
-                searched++;
+                // Set the current state to the first item of the frontier queue, adding it to the set of searched nodes
+                currentState = _frontier.First.Value;
+                _frontier.RemoveFirst();
+                _searchedNodes.Add(currentState.Data);
+                _searched++;
 
-                //Check if this current state is the goal state, if so exit the loop; We're done!
+                // Check if this current state is the goal state, if so exit the loop; We're done!
                 if (scenario.IsGoalState(currentState, goalState))
                 {
                     foundGoal = true;
                     break;
                 }
 
-                //Add all possible moves from the current state to the back of the frontier queue
+                // Add all possible moves from the current state to the back of the frontier queue
                 AddArrayToFrontier(scenario.GetPossibleMoves(currentState));
-            }
+            } while (_frontier.Count > 0); // While there is still nodes to search
 
-            //Solution found! Print it out!
-            scenario.PrintSolution(currentState, discovered, searched, output, foundGoal);
+            // Print out solution
+            scenario.PrintSolution(currentState, _discovered, _searched, output, foundGoal);
 
-            //Produce an in-order list of steps to take to reach the goal and return it
-            LinkedList<State<T>> solution = new LinkedList<State<T>>();
+            // Produce an in-order list of steps to take to reach the goal and return it
             if (!foundGoal) return solution;
 
-            State<T> stateToAdd = currentState;
-            while (stateToAdd != null)
+            do
             {
-                solution.AddFirst(stateToAdd);
-                stateToAdd = stateToAdd.parent;
-            }
+                solution.AddFirst(currentState);
+                currentState = currentState.Parent;
+            } while (currentState is not null);
 
             return solution;
         }

@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 
 namespace RobotNav
 {
     internal abstract class Pathfinder<T>
     {
-        protected HashSet<T> searchedNodes;
-        protected int discovered = 0, searched = 0;
+        protected HashSet<T> _searchedNodes = new();
+        protected int _discovered = 0, _searched = 0;
 
         /// <summary>
         /// Adds the given list of states to the frontier

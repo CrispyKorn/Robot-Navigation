@@ -1,66 +1,59 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Drawing;
+﻿
 
 namespace RobotNav
 {
     internal class Robot
     {
-        Color color;
-        Rectangle body;
-        Point pos;
-        Grid grid;
+        private Color _color;
+        private Rectangle _body;
+        private Point _pos;
+        private Grid _grid;
 
         /// <summary>
         /// The grid position of the robot
         /// </summary>
-        public Point Pos { get { return pos; } }
+        public Point Pos { get { return _pos; } }
         /// <summary>
         /// The color of the robot
         /// </summary>
-        public Color Color { get { return color; } }
+        public Color Color { get { return _color; } }
 
         /// <summary>
         /// Represents and manages a robot for use in a grid
         /// </summary>
-        /// <param name="_color">The colour of the robot</param>
+        /// <param name="color">The colour of the robot</param>
         /// <param name="startPos">The starting position of the robot</param>
-        /// <param name="_grid">The grid on which the robot will exist</param>
-        public Robot(Color _color, Point startPos, Grid _grid)
+        /// <param name="grid">The grid on which the robot will exist</param>
+        public Robot(Color color, Point startPos, Grid grid)
         {
-            color = _color;
-            pos = startPos;
-            grid = _grid;
-            int robotSize = grid.CellSize * 2 / 3;
-            body = new Rectangle(pos, new Size(robotSize, robotSize));
+            _color = color;
+            _pos = startPos;
+            _grid = grid;
+            int robotSize = _grid.CellSize * 2 / 3;
+            _body = new Rectangle(_pos, new Size(robotSize, robotSize));
 
-            //Position the robot correctly in the grid display
-            body.Location = GetNewRobotLocation();
-            //Place the robot into the grid
-            grid.PlaceInCell(Grid.Content.Robot, pos);
+            _body.Location = GetNewRobotLocation(); // Position the robot correctly in the grid display
+            _grid.PlaceInCell(Grid.Content.Robot, _pos); // Place the robot into the grid
         }
 
         /// <summary>
         /// Moves the robot in grid coordinates relative to its current position
         /// </summary>
-        /// <param name="x">The amount to move on the X-Axis</param>
-        /// <param name="y">The amount to move on the Y-Axis</param>
-        public void Move(int x, int y)
+        /// <param name="moveX">The amount to move on the X-Axis</param>
+        /// <param name="moveY">The amount to move on the Y-Axis</param>
+        public void Move(int moveX, int moveY)
         {
-            //Validate the given movement as a walkable position
-            if (!grid.MoveablePos(new Point(pos.X + x, pos.Y + y))) return;
+            // Validate the given movement as a walkable position
+            if (!_grid.MoveablePos(new Point(_pos.X + moveX, _pos.Y + moveY))) return;
 
-            //Move the robot
-            grid.RemoveFromCell(Grid.Content.Robot, pos);
-            pos.X += x;
-            pos.Y += y;
-            grid.PlaceInCell(Grid.Content.Robot, pos);
+            // Move the robot
+            _grid.RemoveFromCell(Grid.Content.Robot, _pos);
+            _pos.X += moveX;
+            _pos.Y += moveY;
+            _grid.PlaceInCell(Grid.Content.Robot, _pos);
 
-            //Update the body position
-            body.Location = GetNewRobotLocation();
+            // Update the body position
+            _body.Location = GetNewRobotLocation();
         }
 
         /// <summary>
@@ -69,16 +62,16 @@ namespace RobotNav
         /// <param name="movePos">The grid position to move the robot to</param>
         public void MoveTo(Point movePos)
         {
-            //Validate the given position as a walkable position
-            if (!grid.MoveablePos(movePos)) return;
+            // Validate the given position as a walkable position
+            if (!_grid.MoveablePos(movePos)) return;
 
-            //Move the robot
-            grid.RemoveFromCell(Grid.Content.Robot, pos);
-            pos = movePos;
-            grid.PlaceInCell(Grid.Content.Robot, pos);
+            // Move the robot
+            _grid.RemoveFromCell(Grid.Content.Robot, _pos);
+            _pos = movePos;
+            _grid.PlaceInCell(Grid.Content.Robot, _pos);
 
-            //Update the body position
-            body.Location = GetNewRobotLocation();
+            // Update the body position
+            _body.Location = GetNewRobotLocation();
         }
 
         /// <summary>
@@ -87,9 +80,9 @@ namespace RobotNav
         /// <returns>Pixel coordinates at which to draw the body</returns>
         private Point GetNewRobotLocation()
         {
-            Point newLocation = grid.CellToWorld(pos);
+            Point newLocation = _grid.CellToWorld(_pos);
 
-            newLocation.Offset(new Point(-body.Height / 2 + 1, -body.Height / 2 + 1));
+            newLocation.Offset(new Point(-_body.Height / 2 + 1, -_body.Height / 2 + 1));
             newLocation.Offset(Constants.MARGIN_SIZE, Constants.MARGIN_SIZE);
 
             return newLocation;
@@ -102,7 +95,7 @@ namespace RobotNav
         /// <param name="brush">The brush to draw with</param>
         public void DrawRobot(Graphics graphics, Brush brush)
         {
-            graphics.FillRectangle(brush, body);
+            graphics.FillRectangle(brush, _body);
         }
     }
 }

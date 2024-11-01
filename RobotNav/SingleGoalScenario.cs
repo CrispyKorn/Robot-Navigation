@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RobotNav
 {
-    internal class SingleGoalScenario: Scenario<Position>
+    internal class SingleGoalScenario: Scenario<GridPosition>
     {
         Grid grid;
         Point goalPos;
@@ -28,9 +28,9 @@ namespace RobotNav
         /// <param name="stateToCheck">The state to be checked against the goal state</param>
         /// <param name="goalState">The target/goal state</param>
         /// <returns>Whether or not the given state matches the given goal state</returns>
-        public override bool IsGoalState(State<Position> stateToCheck, State<Position> goalState)
+        public override bool IsGoalState(State<GridPosition> stateToCheck, State<GridPosition> goalState)
         {
-            return stateToCheck.data.position == goalState.data.position;
+            return stateToCheck.Data.Position == goalState.Data.Position;
         }
 
         /// <summary>
@@ -38,10 +38,10 @@ namespace RobotNav
         /// </summary>
         /// <param name="state">The state from which to get all possible moves</param>
         /// <returns>A list of states corresponding to all direct possible moves in order of (up, down, left, right)</returns>
-        public override List<State<Position>> GetPossibleMoves(State<Position> state)
+        public override List<State<GridPosition>> GetPossibleMoves(State<GridPosition> state)
         {
-            List<State<Position>> moves = new List<State<Position>>();
-            Point startingPos = state.data.position;
+            List<State<GridPosition>> moves = new List<State<GridPosition>>();
+            Point startingPos = state.Data.Position;
             Point up = new Point(startingPos.X, startingPos.Y - 1);
             Point left = new Point(startingPos.X - 1, startingPos.Y);
             Point down = new Point(startingPos.X, startingPos.Y + 1);
@@ -62,14 +62,14 @@ namespace RobotNav
         /// <param name="posToAdd">The grid-based position to assign to the state</param>
         /// <param name="name">The name of the new state</param>
         /// <param name="initialState">The parent state from which this state is expanded from</param>
-        private void AddNewState(ref List<State<Position>> moves, Point posToAdd, string name, State<Position> initialState)
+        private void AddNewState(ref List<State<GridPosition>> moves, Point posToAdd, string name, State<GridPosition> initialState)
         {
-            moves.Add(new State<Position>(
-                new Position(posToAdd), 
+            moves.Add(new State<GridPosition>(
+                new GridPosition(posToAdd), 
                 initialState,
                 name, 
                 grid.GetHCost(posToAdd, goalPos), 
-                initialState.gCost + 1f));
+                initialState.GCost + 1f));
         }
     }
 }

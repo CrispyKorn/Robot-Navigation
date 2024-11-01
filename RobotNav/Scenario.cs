@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 
 namespace RobotNav
 {
@@ -32,7 +28,6 @@ namespace RobotNav
         /// <param name="txtbox">The textbox in which to display the solution</param>
         public void PrintSolution(State<T> finalState, int discovered, int searched, TextBox txtbox, bool foundGoal)
         {
-            //Print it out!
             txtbox.Text = "Nodes discovered: " + discovered + " | Nodes searched: " + searched + Environment.NewLine;
             
             if (!foundGoal)
@@ -40,19 +35,21 @@ namespace RobotNav
                 txtbox.Text += "No Solution Found.";
                 return;
             }
-                
-            State<T> currentState = finalState;
-            Stack<string> solution = new Stack<string>();
+
+            var currentState = finalState;
+            Stack<string> solution = new();
 
             //Traverse up the chain of states in reverse
-            while (currentState.parent != null)
+            while (currentState.Parent is not null)
             {
                 //Add each state to the start of the solution (to keep them in order when printed)
-                solution.Push(currentState.name);
-                currentState = currentState.parent;
+                solution.Push(currentState.Name);
+                currentState = currentState.Parent;
             }
 
-            txtbox.Text += "Solution Length: " + solution.Count + Environment.NewLine + Environment.NewLine +
+            txtbox.Text += "Solution Length: " + solution.Count + 
+                Environment.NewLine + 
+                Environment.NewLine +
                 "Solution: ";
 
             if (solution.Count == 0) return;

@@ -1,24 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 
 namespace RobotNav
 {
     internal class IDFS<T> : Pathfinder<T>
     {
-        LinkedList<State<T>> frontier;
+        LinkedList<State<T>> _frontier = new();
 
-        int maxDepth = 0;
+        int _maxDepth = 0;
 
         /// <summary>
         /// A pathfinder that uses Iterative Depth-First Search
         /// </summary>
         public IDFS()
         {
-            frontier = new LinkedList<State<T>>();
-            searchedNodes = new HashSet<T>();
+            
         }
 
         /// <summary>
@@ -28,12 +23,12 @@ namespace RobotNav
         public override void AddArrayToFrontier(List<State<T>> nodes)
         {
             //Iterate through the nodes to add backwards so they stay in order when added to the frontier
-            for (int i = nodes.Count - 1; i >= 0; i--)
+            for (var i = nodes.Count - 1; i >= 0; i--)
             {
-                if (!searchedNodes.Contains(nodes[i].data))
+                if (!_searchedNodes.Contains(nodes[i].Data))
                 {
-                    frontier.AddFirst(nodes[i]);
-                    discovered++;
+                    _frontier.AddFirst(nodes[i]);
+                    _discovered++;
                 }
             }
         }
@@ -49,69 +44,69 @@ namespace RobotNav
         public override LinkedList<State<T>> Search(State<T> initialState, State<T> goalState, Scenario<T> scenario, TextBox output)
         {
             State<T> baseState;
-            //For when we haven't already added a list of starting options
-            if (initialState != null) baseState = initialState;
-            else baseState = frontier.First.Value;
+            // For when we haven't already added a list of starting options
+            if (initialState is not null) baseState = initialState;
+            else baseState = _frontier.First.Value;
                 
-            frontier.AddFirst(baseState);
+            _frontier.AddFirst(baseState);
+            LinkedList<State<T>> solution = new();
 
-            State<T> currentState = null;
-            bool foundGoal = false;
+            if (_frontier.Count == 0 || _frontier.First is null) return solution;
 
-            //While there is still nodes to search
-            while (frontier.Count > 0)
+            State<T> currentState;
+            var foundGoal = false;
+
+            do
             {
-                //Set the current state to the first item of the frontier queue, adding it to the set of searched nodes
-                currentState = frontier.First.Value;
-                frontier.RemoveFirst();
-                searchedNodes.Add(currentState.data);
-                searched++;
+                // Set the current state to the first item of the frontier queue, adding it to the set of searched nodes
+                currentState = _frontier.First.Value;
+                _frontier.RemoveFirst();
+                _searchedNodes.Add(currentState.Data);
+                _searched++;
 
-                //Check if this current state is the goal state, if so exit the loop; We're done!
+                // Check if this current state is the goal state, if so exit the loop; We're done!
                 if (scenario.IsGoalState(currentState, goalState))
                 {
                     foundGoal = true;
                     break;
                 }
 
-                //Get the depth of the current node by iterating up through its parents
-                int currentDepth = 0;
-                State<T> tempState = currentState;
-                while (tempState.parent != null)
+                // Get the depth of the current node by iterating up through its parents
+                var currentDepth = 0;
+                var tempState = currentState;
+                while (tempState.Parent != null)
                 {
-                    tempState = tempState.parent;
+                    tempState = tempState.Parent;
                     currentDepth++;
                 }
 
-                if (currentDepth <= maxDepth)
+                if (currentDepth <= _maxDepth)
                 {
-                    //Add all possible moves from the current state to the back of the frontier queue
+                    // Add all possible moves from the current state to the back of the frontier queue
                     AddArrayToFrontier(scenario.GetPossibleMoves(currentState));
                 }
 
-                //If we're on the final node of this depth, reset everything and increment the max depth
-                if (frontier.Count == 0)
+                // If we're on the final node of this depth, reset everything and increment the max depth
+                if (_frontier.Count == 0)
                 {
-                    maxDepth++;
+                    _maxDepth++;
 
-                    frontier.AddFirst(baseState);
-                    searchedNodes.Clear();
+                    _frontier.AddFirst(baseState);
+                    _searchedNodes.Clear();
                 }
-            }
+            } while (_frontier.Count > 0) ; // While there is still nodes to search
 
-            //Solution found! Print it out!
-            scenario.PrintSolution(currentState, discovered, searched, output,foundGoal);
+            // Solution found! Print it out!
+            scenario.PrintSolution(currentState, _discovered, _searched, output,foundGoal);
 
-            //Produce an in-order list of steps to take to reach the goal and return it
-            LinkedList<State<T>> solution = new LinkedList<State<T>>();
+            // Produce an in-order list of steps to take to reach the goal and return it
             if (!foundGoal) return solution;
 
-            State<T> stateToAdd = currentState;
-            while (stateToAdd != null)
+            do
             {
-                solution.AddFirst(stateToAdd);
-                stateToAdd = stateToAdd.parent;
-            }
+                solution.AddFirst(currentState);
+                currentState = currentState.Parent;
+            } while (currentState is not null);
 
             return solution;
         }
