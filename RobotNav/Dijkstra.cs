@@ -18,11 +18,11 @@ namespace RobotNav
         /// Adds the given list of states to the frontier priority queue
         /// </summary>
         /// <param name="nodes">The list of states to add</param>
-        public override void AddArrayToFrontier(List<State<T>> nodes)
+        protected override void AddArrayToFrontier(List<State<T>> nodes)
         {
             foreach (var node in nodes)
             {
-                if (!_searchedNodes.Contains(node.Data))
+                if (node is not null && !_searchedNodes.Contains(node.Data))
                 {
                     _frontier.Enqueue(node, node.GCost);
                     _discovered++;
@@ -40,12 +40,10 @@ namespace RobotNav
         /// <returns></returns>
         public override LinkedList<State<T>> Search(State<T> initialState, State<T> goalState, Scenario<T> scenario, TextBox output)
         {
-            // For when we haven't already added a list of starting options
-            if (initialState is not null) _frontier.Enqueue(initialState, 0);
-
             LinkedList<State<T>> solution = new();
 
-            if (_frontier.Count == 0) return solution;
+            if (initialState is not null) _frontier.Enqueue(initialState, 0);
+            else return solution;
 
             State<T> currentState;
             var foundGoal = false;

@@ -20,12 +20,12 @@ namespace RobotNav
         /// Adds the given list of states to the start of the frontier list
         /// </summary>
         /// <param name="nodes">The list of states to add</param>
-        public override void AddArrayToFrontier(List<State<T>> nodes)
+        protected override void AddArrayToFrontier(List<State<T>> nodes)
         {
             //Iterate through the nodes to add backwards so they stay in order when added to the frontier
             for (var i = nodes.Count - 1; i >= 0; i--)
             {
-                if (!_searchedNodes.Contains(nodes[i].Data))
+                if (nodes[i] is not null && !_searchedNodes.Contains(nodes[i].Data))
                 {
                     _frontier.AddFirst(nodes[i]);
                     _discovered++;
@@ -43,15 +43,13 @@ namespace RobotNav
         /// <returns></returns>
         public override LinkedList<State<T>> Search(State<T> initialState, State<T> goalState, Scenario<T> scenario, TextBox output)
         {
+            LinkedList<State<T>> solution = new();
             State<T> baseState;
-            // For when we haven't already added a list of starting options
+
             if (initialState is not null) baseState = initialState;
-            else baseState = _frontier.First.Value;
+            else return solution;
                 
             _frontier.AddFirst(baseState);
-            LinkedList<State<T>> solution = new();
-
-            if (_frontier.Count == 0 || _frontier.First is null) return solution;
 
             State<T> currentState;
             var foundGoal = false;
@@ -96,7 +94,7 @@ namespace RobotNav
                 }
             } while (_frontier.Count > 0) ; // While there is still nodes to search
 
-            // Solution found! Print it out!
+            // Print out solution
             scenario.PrintSolution(currentState, _discovered, _searched, output,foundGoal);
 
             // Produce an in-order list of steps to take to reach the goal and return it

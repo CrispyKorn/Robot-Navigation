@@ -11,7 +11,7 @@ namespace RobotNav
         /// Adds the given list of states to the frontier
         /// </summary>
         /// <param name="nodes">The list of states to add</param>
-        public abstract void AddArrayToFrontier(List<State<T>> nodes);
+        protected abstract void AddArrayToFrontier(List<State<T>> nodes);
 
         /// <summary>
         /// Searches to find a solution, returning an in-order list of steps to the goal
